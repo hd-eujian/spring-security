@@ -20,50 +20,52 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     IpAuthenticationProvider ipAuthenticationProvider() {
         return new IpAuthenticationProvider();
     }
-
+    //myip认证者配置
+    @Bean
+    MyIpAuthenticationProvider myIpAuthenticationProvider() {
+        return new MyIpAuthenticationProvider();
+    }
     //配置封装ipAuthenticationToken的过滤器
     IpAuthenticationProcessingFilter ipAuthenticationProcessingFilter(AuthenticationManager authenticationManager) {
         IpAuthenticationProcessingFilter ipAuthenticationProcessingFilter = new IpAuthenticationProcessingFilter();
         //为过滤器添加认证器
         ipAuthenticationProcessingFilter.setAuthenticationManager(authenticationManager);
         //重写认证失败时的跳转页面
-        ipAuthenticationProcessingFilter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/ipLogin?error"));
+//        ipAuthenticationProcessingFilter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/ipLogin?error"));
         return ipAuthenticationProcessingFilter;
     }
 
-    //配置登录端点
-    @Bean
-    LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint(){
-        LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint = new LoginUrlAuthenticationEntryPoint
-                ("/ipLogin");
-        return loginUrlAuthenticationEntryPoint;
+    //配置封装ipAuthenticationToken的过滤器
+    MyIpAuthenticationProcessingFilter myipAuthenticationProcessingFilter(AuthenticationManager authenticationManager) {
+        MyIpAuthenticationProcessingFilter ipAuthenticationProcessingFilter = new MyIpAuthenticationProcessingFilter();
+        //为过滤器添加认证器
+        ipAuthenticationProcessingFilter.setAuthenticationManager(authenticationManager);
+        return ipAuthenticationProcessingFilter;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/", "/home").permitAll()
-                .antMatchers("/ipLogin").permitAll()
+//                .antMatchers("/", "/home").permitAll()
+//                .antMatchers("/ipLogin").permitAll()
                 .anyRequest().authenticated()
-                .and()
-            .logout()
-                .logoutSuccessUrl("/")
-                .permitAll()
-                .and()
-            .exceptionHandling()
-                .accessDeniedPage("/ipLogin")
-                .authenticationEntryPoint(loginUrlAuthenticationEntryPoint())
+//                .and()
+//            .exceptionHandling()
+//                .accessDeniedPage("/ipLogin")
+//                .authenticationEntryPoint(loginUrlAuthenticationEntryPoint())
         ;
 
         //注册IpAuthenticationProcessingFilter  注意放置的顺序 这很关键
         http.addFilterBefore(ipAuthenticationProcessingFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(myipAuthenticationProcessingFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class);
 
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(ipAuthenticationProvider());
+        auth.authenticationProvider(myIpAuthenticationProvider());
     }
 
 }

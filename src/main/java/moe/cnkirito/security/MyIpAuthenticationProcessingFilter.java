@@ -13,18 +13,18 @@ import java.io.IOException;
 /**
  * Created by xujingfeng on 2017/9/26.
  */
-public class IpAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
+public class MyIpAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
     //使用/ipVerify该端点进行ip认证
-    IpAuthenticationProcessingFilter() {
-        super(new AntPathRequestMatcher("/ip/**"));
+    MyIpAuthenticationProcessingFilter() {
+        super(new AntPathRequestMatcher("/token/**"));
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         //获取host信息
-        String host = request.getRemoteHost();
+        String token = request.getHeader("token");
         //交给内部的AuthenticationManager去认证，实现解耦
-        return getAuthenticationManager().authenticate(new IpAuthenticationToken(host));
+        return getAuthenticationManager().authenticate(new MyIpAuthenticationToken(token));
     }
 }
